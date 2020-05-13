@@ -5,17 +5,34 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\Common\Collections\ArrayCollection;
+use ApiPlatform\Core\Annotation\ApiSubresource;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Core\Serializer\Filter\GroupFilter;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
+ * @ORM\Table(name="product")
  * @ORM\Entity
+ * 
+ * @ApiResource(
+ *     collectionOperations={"get"={"method"="GET"}},
+ *     itemOperations={"get"={"method"="GET"}}
+ * )
  * @UniqueEntity("name") 
  */
 class Product 
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @ORM\Id()
      */
     private $id;
 
@@ -36,6 +53,20 @@ class Product
      * @Assert\NotBlank 
      */
     private $description;
+
+    /**
+     * @Assert\Date
+     * @var string A "Y-m-d H:i:s" formatted value
+     * @ORM\Column(type="datetime", nullable = true)
+     */
+    public $dateAdd;
+
+    /**
+     * @var string[] Describe the product
+     *
+     * @ORM\Column(type="json", nullable = true)
+     */
+    public $properties;
 
     /**
      * @ORM\Column(type="decimal", precision=65, scale=2)
@@ -81,6 +112,42 @@ class Product
     public function setDescription(string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get describe the product
+     *
+     * @return  string[]
+     */ 
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    public function getDateAdd(): ?\DateTimeInterface
+    {
+        return $this->dateAdd;
+    }
+
+    public function setDateAdd(\DateTimeInterface $dateAdd): self
+    {
+        $this->dateAdd = $dateAdd;
+
+        return $this;
+    }
+
+    /**
+     * Set describe the product
+     *
+     * @param  string[]  $properties  Describe the product
+     *
+     * @return  self
+     */ 
+    public function setProperties(string $properties)
+    {
+        $this->properties = $properties;
 
         return $this;
     }

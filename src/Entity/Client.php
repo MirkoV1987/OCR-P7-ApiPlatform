@@ -6,51 +6,45 @@ use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
+ * @ORM\Table(name="clients")
  * @ORM\Entity
  * @UniqueEntity("name") 
  */
 class Client 
 {
+    const ROLE_ADMIN = 'ROLE_ADMIN';
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string", length=80)
      */
-    private $username;
+    private $name;
 
     /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
-
-    /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=150, unique=true)
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * 
-     * @Assert\Length(
-     *      min = 8,
-     *      max = 254,
-     *      minMessage = "Votre mot de passe doit contenir au moins 8 caractères.",
-     *      maxMessage = "Votre mot de passe ne peut pas contenir plus que {{ limit }} caractères !"
-     * )
-     * @Assert\Regex(
-     *     pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W)^",
-     *     match = true,
-     *     message = "Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial !"
-     * )
+     * @var string The hashed password
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank
      */
     private $password;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $roles = [];
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="client", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -62,14 +56,14 @@ class Client
         return $this->id;
     }
 
-    public function getUsername(): ?string
+    public function getName(): ?string
     {
-        return $this->username;
+        return $this->name;
     }
 
-    public function setUsername(string $username): self
+    public function setName(string $name): self
     {
-        $this->username = $username;
+        $this->name = $name;
 
         return $this;
     }
@@ -86,14 +80,36 @@ class Client
         return $this;
     }
 
-    public function getPassword(): string
+    public function getPassword()
     {
-        return (string) $this->password;
+        return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    public function getSalt()
+    {
+        return null;
+    }
+  
+    public function eraseCredentials() {}
+
+    public function getRoles(): array
+    {
+        $this->roles;
+
+        return json_decode($roles);
+    }
+
+    /**
+     * @return  self
+     */ 
+    public function setRoles($roles)
+    {
+        $this->roles = $roles;
 
         return $this;
     }
@@ -120,7 +136,6 @@ class Client
     {
         if ($this->users->contains($user)) {
             $this->users->removeElement($user);
-            // set the owning side to null (unless already changed)
             if ($user->getClient() === $this) {
                 $user->setClient(null);
             }
@@ -128,24 +143,4 @@ class Client
 
         return $this;
     }
-
-    public function getRoles(): array
-    {
-        $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    public function getSalt() {}
-
-    public function eraseCredentials() {}
 }

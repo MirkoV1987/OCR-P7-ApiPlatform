@@ -6,31 +6,35 @@ use App\Entity\Client;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
+ * @ORM\Table(name="users")
  * @ORM\Entity
  * @UniqueEntity("email") 
  */
-class User 
+class User implements UserInterface
 {
+    //const ROLE_ADMIN = 'ROLE_ADMIN';
+    const ROLE_USER = 'ROLE_USER';
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string", length=80)
      */
     private $username;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=150, unique=true)
      */
     private $email;
 
-     /**
+    /**
      * @var string The hashed password
      * @ORM\Column(type="string")
      * @Assert\NotBlank
@@ -38,7 +42,7 @@ class User
     private $password;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="json", nullable=true)
      */
     private $roles = [];
 
@@ -48,7 +52,9 @@ class User
     private $client;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Assert\Date
+     * @var string A "Y-m-d H:i:s" formatted value
+     * @ORM\Column(type="datetime", nullable = true)
      */
     private $dateAdd;
 
@@ -81,28 +87,34 @@ class User
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function getPassword()
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword($password)
     {
         $this->password = $password;
-
-        return $this;
     }
+
+    public function getSalt()
+    {
+        return null;
+    }
+  
+    public function eraseCredentials() {}
 
     public function getRoles(): array
     {
         $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return json_decode($roles);
     }
 
-    public function setRoles(array $roles): self
+    /**
+     * @return  self
+     */ 
+    public function setRoles($roles)
     {
         $this->roles = $roles;
 
@@ -132,8 +144,4 @@ class User
 
         return $this;
     }
-
-    public function getSalt() {}
-
-    public function eraseCredentials() {}
 }
