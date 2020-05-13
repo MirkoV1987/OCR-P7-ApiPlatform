@@ -1,3 +1,33 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+register:
+    path: /api/register
+    controller: App\Controller\AuthController::register
+    methods: POST
+
+product:
+    path: /api/create
+    controller: App\Controller\ProductController::create
+    methods: POST
+
+products_list:
+    path: /api/products
+    controller: App\Controller\ProductController::list
+    methods: GET
+
+products_detail:
+    path: /api/products/:id
+    controller: App\Controller\ProductController::detail
+    methods: GET
+
+
+
+
+login_check:
+    path:     /login_check
+    methods:  [POST]
+
+swagger_ui:
+    path: /docs
+    controller: api_platform.swagger.action.ui
