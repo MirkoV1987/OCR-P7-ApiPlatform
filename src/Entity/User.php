@@ -5,13 +5,28 @@ namespace App\Entity;
 use App\Entity\Client;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ORM\Table(name="users")
  * @ORM\Entity
  * @UniqueEntity("email") 
+ * @ApiResource(normalizationContext={"groups"={"users"}, "enable_max_depth"=true})
+ * @ApiResource(
+ *     normalizationContext={"groups"={"get"}},
+ *     itemOperations={
+ *         "get",
+ *         "put"={
+ *             "normalization_context"={"groups"={"put"}}
+ *         }
+ *     }
+ * )
  */
 class User implements UserInterface
 {
@@ -48,6 +63,8 @@ class User implements UserInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
+     * @Groups({"users"})
+     * @MaxDepth(4)
      */
     private $client;
 
