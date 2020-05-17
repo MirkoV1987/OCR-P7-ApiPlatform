@@ -16,6 +16,8 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 /**
  * @ORM\Table(name="clients")
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
+ * 
  * @UniqueEntity("name") 
  * @ApiResource(normalizationContext={"groups"={"users"}, "enable_max_depth"=true})
  */
@@ -23,6 +25,7 @@ class Client
 {
     const ROLE_ADMIN = 'ROLE_ADMIN';
     /**
+     * @var int
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
