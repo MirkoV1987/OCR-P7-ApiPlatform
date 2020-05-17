@@ -26,8 +26,8 @@ class AuthController extends AbstractController
         }
 
         $user = new User($username);
-        $user->setUsername('Mirko Venturi');  
-        $user->setEmail('mirkoventuri@gmail.com');
+        $user->setUsername('MirkoV1987');  
+        $user->setEmail('bilemo@gmail.com');
         $user->setDateAdd(new \Datetime);  
         $user->setPassword($encoder->encodePassword($user, $password));
         $user->setRoles(($roles));
