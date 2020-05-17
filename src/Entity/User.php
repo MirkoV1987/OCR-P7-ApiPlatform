@@ -2,13 +2,16 @@
 
 namespace App\Entity;
 
+use App\Uuid;
 use App\Entity\Client;
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
@@ -16,7 +19,9 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 /**
  * @ORM\Table(name="users")
  * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity("email") 
+ * 
  * @ApiResource(normalizationContext={"groups"={"users"}, "enable_max_depth"=true})
  * @ApiResource(
  *     normalizationContext={"groups"={"get"}},
@@ -33,9 +38,11 @@ class User implements UserInterface
     //const ROLE_ADMIN = 'ROLE_ADMIN';
     const ROLE_USER = 'ROLE_USER';
     /**
+     * @var int
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
      */
     private $id;
 
@@ -55,6 +62,11 @@ class User implements UserInterface
      * @Assert\NotBlank
      */
     private $password;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $slug;
 
     /**
      * @ORM\Column(type="json", nullable=true)
@@ -112,6 +124,38 @@ class User implements UserInterface
     public function setPassword($password)
     {
         $this->password = $password;
+    }
+
+    /**
+     * Initialize slug
+     * @ORM\PrePersist
+     */
+    public function initializeSlug()
+    {
+        if (empty($this->slug)) {
+            $slugify = new Slugify();
+            $slug = $this->username;
+            $this->slug = $slugify->slugify($slug);
+        }
+    }
+
+     /**
+     * @return string|null
+     */
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string $slug
+     * @return $this
+     */
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
     }
 
     public function getSalt()
