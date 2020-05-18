@@ -19,19 +19,20 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 /**
  * @ORM\Table(name="users")
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity("email") 
  * 
- * @ApiResource(normalizationContext={"groups"={"users"}, "enable_max_depth"=true})
  * @ApiResource(
- *     normalizationContext={"groups"={"get"}},
+ *     collectionOperations={
+ *          "get",
+ *          "post"={"path"="/user", "status"=301}
+ *     },
  *     itemOperations={
- *         "get",
- *         "put"={
- *             "normalization_context"={"groups"={"put"}}
- *         }
- *     }
+ *          "get"={"path"="/users/{id}"}
+ *     },
+ *     normalizationContext={"groups"={"list_users"}, "enable_max_depth"=true}
  * )
+ * 
+ * @UniqueEntity("email")
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository") 
  */
 class User implements UserInterface
 {
@@ -48,11 +49,13 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=80)
+     * @Groups({"list_users"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=150, unique=true)
+     * @Groups({"list_users"})
      */
     private $email;
 
@@ -68,14 +71,15 @@ class User implements UserInterface
      */
     private $slug;
 
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $roles = [];
+    // /**
+    //  * @ORM\Column(type="json", nullable=true)
+    //  * @Groups({"list_users"})
+    //  */
+    // private $roles = [];
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
-     * @Groups({"users"})
+     * @Groups({"list_users"})
      * @MaxDepth(4)
      */
     private $client;
@@ -84,6 +88,7 @@ class User implements UserInterface
      * @Assert\Date
      * @var string A "Y-m-d H:i:s" formatted value
      * @ORM\Column(type="datetime", nullable = true)
+     * @Groups({"list_users"})
      */
     private $dateAdd;
 
