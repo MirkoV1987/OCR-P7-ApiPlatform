@@ -16,10 +16,16 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 /**
  * @ORM\Table(name="clients")
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
  * 
- * @UniqueEntity("name") 
- * @ApiResource(normalizationContext={"groups"={"users"}, "enable_max_depth"=true})
+ * @ApiResource(
+ *      normalizationContext={
+ *          "groups"={"client_users"}, 
+ *          "enable_max_depth"=true
+ *      }
+ * )
+ * 
+ * @UniqueEntity("name")
+ * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
  */
 class Client 
 {
@@ -34,6 +40,7 @@ class Client
 
     /**
      * @ORM\Column(type="string", length=80)
+     * @Groups({"client_users"})
      */
     private $name;
 
@@ -56,7 +63,7 @@ class Client
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="client", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @Groups({"users"})
+     * @Groups({"client_users"})
      * @MaxDepth(2)
      */
     private $users;
