@@ -20,22 +20,26 @@ use ApiPlatform\Core\Annotation\ApiResource;
 /**
  * @ORM\Table(name="product")
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * 
  * @ApiResource(
  *     normalizationContext={"groups"={"get"}},
- *     collectionOperations={"get"={"method"="GET"}},
+ *     collectionOperations={"get"},
  *     itemOperations={
- *          "get"={"path"="/smartphones/{id}"}
+ *          "get"={
+ *              "path"="/smartphones/{id}",
+ *              "requirements"={"id"="\d+"},
+ *          }
  *     },
- *     shortName="smartphones",
+ *     shortName="Smartphones",
  *     normalizationContext={"groups"={"smartphones:read"}}
  * )
  * 
  * @ApiFilter(SearchFilter::class, properties={"description": "partial", "brand": "exact", "properties": "partial"})
  * @ApiFilter(RangeFilter::class, properties={"price"})
  * @ApiFilter(DateFilter::class, properties={"dateAdd"})
+ * 
  * @UniqueEntity("name") 
+ * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  */
 class Product 
 {
