@@ -23,12 +23,19 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  * @ApiResource(
  *     collectionOperations={
  *          "get",
- *          "post"={"path"="/user", "status"=301}
+ *          "post"={"status"=301}
  *     },
  *     itemOperations={
  *          "get"={"path"="/users/{id}"}
  *     },
- *     normalizationContext={"groups"={"list_users"}, "enable_max_depth"=true}
+ *     normalizationContext={
+ *          "groups"={"list_users:read"},
+ *          "enable_max_depth"=true,    
+ *          "swagger_definition_name"="Read"},
+ * 
+ *     denormalizationContext={
+ *          "groups"={"user:write"},
+ *          "swagger_definition_name"="Write"}
  * )
  * 
  * @UniqueEntity("email")
@@ -49,37 +56,37 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=80)
-     * @Groups({"list_users"})
+     * @Groups({"list_users:read", "user:write"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=150, unique=true)
-     * @Groups({"list_users"})
+     * @Groups({"list_users:read", "user:write"})
      */
     private $email;
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Assert\NotBlank
      */
     private $password;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $slug;
+    // /**
+    //  * @ORM\Column(type="string", length=255)
+    //  * @Groups({"user:write"})
+    //  */
+    // private $slug;
 
     // /**
     //  * @ORM\Column(type="json", nullable=true)
-    //  * @Groups({"list_users"})
+    //  * @Groups({"list_users:read"})
     //  */
     // private $roles = [];
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
-     * @Groups({"list_users"})
+     * @Groups({"list_users:read"})
      * @MaxDepth(4)
      */
     private $client;
@@ -88,7 +95,7 @@ class User implements UserInterface
      * @Assert\Date
      * @var string A "Y-m-d H:i:s" formatted value
      * @ORM\Column(type="datetime", nullable = true)
-     * @Groups({"list_users"})
+     * @Groups({"list_users:read", "user:write"})
      */
     private $dateAdd;
 
@@ -131,37 +138,37 @@ class User implements UserInterface
         $this->password = $password;
     }
 
-    /**
-     * Initialize slug
-     * @ORM\PrePersist
-     */
-    public function initializeSlug()
-    {
-        if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $slug = $this->username;
-            $this->slug = $slugify->slugify($slug);
-        }
-    }
+    // /**
+    //  * Initialize slug
+    //  * @ORM\PrePersist
+    //  */
+    // public function initializeSlug()
+    // {
+    //     if (empty($this->slug)) {
+    //         $slugify = new Slugify();
+    //         $slug = $this->username;
+    //         $this->slug = $slugify->slugify($slug);
+    //     }
+    // }
 
-     /**
-     * @return string|null
-     */
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
+    //  /**
+    //  * @return string|null
+    //  */
+    // public function getSlug(): ?string
+    // {
+    //     return $this->slug;
+    // }
 
-    /**
-     * @param string $slug
-     * @return $this
-     */
-    public function setSlug(string $slug): self
-    {
-        $this->slug = $slug;
+    // /**
+    //  * @param string $slug
+    //  * @return $this
+    //  */
+    // public function setSlug(string $slug): self
+    // {
+    //     $this->slug = $slug;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getSalt()
     {
