@@ -21,17 +21,22 @@ use ApiPlatform\Core\Annotation\ApiResource;
  * @ORM\Table(name="product")
  * @ORM\Entity
  * 
- * @ApiResource(
- *     normalizationContext={"groups"={"get"}},
- *     collectionOperations={"get"},
- *     itemOperations={
- *          "get"={
- *              "path"="/smartphones/{id}",
- *              "requirements"={"id"="\d+"},
- *          }
+ *@ApiResource(
+ *     collectionOperations={
+ *         "get"={
+ *              "method"="GET",
+ *              "normalization_context"={"groups"={"list"}}
+ *          },
+ *         "post"={"method"="POST"}
  *     },
- *     shortName="Smartphones",
- *     normalizationContext={"groups"={"smartphones:read"}}
+ *     itemOperations={
+ *         "get"={
+ *              "method"="GET",
+ *              "normalization_context"={"groups"={"show"}}
+ *          },
+ *         "put"={"method"="PUT"},
+ *         "delete"={"method"="DELETE"}
+ *     }
  * )
  * 
  * @ApiFilter(SearchFilter::class, properties={"description": "partial", "brand": "exact", "properties": "partial"})
@@ -53,7 +58,7 @@ class Product
     /**
      * @ORM\Column(type="string", length=125)
      * @Assert\NotBlank
-     * @Groups({"smartphones:read"})
+     * @Groups({"list", "show"})
      * 
      */
     private $name;
@@ -61,14 +66,14 @@ class Product
     /**
      * @ORM\Column(type="string", length=100)
      * @Assert\NotBlank
-     * @Groups({"smartphones:read"})
+     * @Groups({"list", "show"})
      */
     private $brand;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank 
-     * @Groups({"smartphones:read"})
+     * @Groups({"show"})
      */
     private $description;
 
@@ -76,7 +81,7 @@ class Product
      * @Assert\Date
      * @var string A "Y-m-d H:i:s" formatted value
      * @ORM\Column(type="datetime", nullable = true)
-     * @Groups({"smartphones:read"})
+     * @Groups({"show"})
      */
     public $dateAdd;
 
@@ -84,14 +89,14 @@ class Product
      * @var string[] Describe the product
      *
      * @ORM\Column(type="json", nullable = true)
-     * @Groups({"smartphones:read"})
+     * @Groups({"show"})
      */
     public $properties;
 
     /**
      * @ORM\Column(type="decimal", precision=65, scale=2)
      * @Assert\NotBlank
-     * @Groups({"smartphones:read"})
+     * @Groups({"list", "show"})
      */
     private $price;
 

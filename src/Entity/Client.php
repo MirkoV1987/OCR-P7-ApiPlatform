@@ -18,6 +18,15 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  * @ORM\Entity
  * 
  * @ApiResource(
+ *      collectionOperations={"get","post"},
+ *       itemOperations={
+ *          "get"={
+ *              "path"="/clients/{id}",
+ *          },
+ *          "delete"={
+ *              "path"="/users/{id}",
+ *          }
+ *      },
  *      normalizationContext={
  *          "groups"={"client_users"}, 
  *          "enable_max_depth"=true
