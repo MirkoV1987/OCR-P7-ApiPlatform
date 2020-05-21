@@ -22,20 +22,25 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  * 
  * @ApiResource(
  *     collectionOperations={
- *          "get",
- *          "post"={"status"=301}
+ *         "get"={
+ *              "method"="GET",
+ *              "normalization_context"={"groups"={"list"}},
+ *              }
+ *     },
+ *     subresourceOperations={
+ *          "api_clients_utilisateurs_get_subresource"={
+ *              "method"="GET",
+ *              "normalization_context"={"groups"={"sub"}}
+ *          }
  *     },
  *     itemOperations={
- *          "get"={"path"="/users/{id}"}
- *     },
- *     normalizationContext={
- *          "groups"={"list_users:read"},
- *          "enable_max_depth"=true,    
- *          "swagger_definition_name"="Read"},
- * 
- *     denormalizationContext={
- *          "groups"={"user:write"},
- *          "swagger_definition_name"="Write"}
+ *         "get"={
+ *              "method"="GET",
+ *              "path"="/users/{id}",
+ *              "normalization_context"={"groups"={"show"}}
+ *          },
+ *         "delete"={"method"="DELETE"}
+ *     }
  * )
  * 
  * @UniqueEntity("email")
@@ -56,13 +61,13 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=80)
-     * @Groups({"list_users:read", "user:write"})
+     * @Groups({"list", "show", "sub"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=150, unique=true)
-     * @Groups({"list_users:read", "user:write"})
+     * @Groups({"show"})
      */
     private $email;
 
@@ -78,24 +83,24 @@ class User implements UserInterface
     //  */
     // private $slug;
 
-    // /**
-    //  * @ORM\Column(type="json", nullable=true)
-    //  * @Groups({"list_users:read"})
-    //  */
-    // private $roles = [];
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     * @Groups({"show"})
+     */
+    private $roles = [];
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
-     * @Groups({"list_users:read"})
-     * @MaxDepth(4)
+     * @Groups({"list", "show"})
      */
     private $client;
 
     /**
      * @Assert\Date
      * @var string A "Y-m-d H:i:s" formatted value
+     * 
      * @ORM\Column(type="datetime", nullable = true)
-     * @Groups({"list_users:read", "user:write"})
+     * @Groups({"show"})
      */
     private $dateAdd;
 

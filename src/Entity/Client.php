@@ -10,8 +10,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ORM\Table(name="clients")
@@ -73,7 +73,7 @@ class Client
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="client", cascade={"persist", "remove"}, orphanRemoval=true)
      * @Groups({"client_users"})
-     * @MaxDepth(2)
+     * @ApiSubResource
      */
     private $users;
 
