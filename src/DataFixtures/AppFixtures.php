@@ -64,14 +64,15 @@ class AppFixtures extends Fixture
         // ================================
         // ============Users===============
         //===============================//
+        
         for($i=1; $i<=14; $i++)
         {
             $user = new User();
             $user->setUsername($faker->username);
             $user->setEmail($faker->safeEmail);
+            $user->setPhone($faker->randomNumber($nbDigits = 6, $strict = true));
             $user->setPassword($this->passwordEncoder->encodePassword($user, 'test'));
             $user->setClient($faker->randomElement($clients));
-            //$user->setSlug('Mario');
             $user->setRoles([User::ROLE_USER]);
             $user->setDateAdd($faker->dateTimeBetween($startDate = '-8 months', $endDate = 'now', $timezone = null));
 
