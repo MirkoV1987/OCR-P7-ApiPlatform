@@ -19,7 +19,6 @@ use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
  * @ORM\Table(name="product")
- * @ORM\Entity
  * 
  *@ApiResource(
  *     collectionOperations={
@@ -27,15 +26,12 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *              "method"="GET",
  *              "normalization_context"={"groups"={"list"}}
  *          },
- *         "post"={"method"="POST"}
  *     },
  *     itemOperations={
  *         "get"={
  *              "method"="GET",
  *              "normalization_context"={"groups"={"show"}}
  *          },
- *         "put"={"method"="PUT"},
- *         "delete"={"method"="DELETE"}
  *     }
  * )
  * 

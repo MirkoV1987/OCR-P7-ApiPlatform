@@ -12,19 +12,34 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * @ORM\Table(name="clients")
- * @ORM\Entity
  * 
  * @ApiResource(
- *      collectionOperations={"get","post"},
+ *      collectionOperations={
+ *          "get"={
+ *              "path"="/clients/{id}/users/id",
+ *              "normalization_context"={"groups"={"client_users"}}
+ *          },
+ *          "post"={
+ *              "path"="/clients/{id}/users/register", "status"=301
+ *          }
+ *      },
+ *      subresourceOperations={
+ *          "api_clients_utilisateurs_get_subresource"={
+ *              "method"="GET",
+ *              "normalization_context"={"groups"={"client_users"}}
+ *          }
+ *      },
  *       itemOperations={
  *          "get"={
- *              "path"="/clients/{id}",
+ *              "path"="/clients/{id}/users",
+ *              "normalization_context"={"groups"={"client_users", "show"}}
  *          },
  *          "delete"={
- *              "path"="/users/{id}",
+ *              "path"="/clients/{id}/users/id",
  *          }
  *      },
  *      normalizationContext={
@@ -44,6 +59,7 @@ class Client
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * 
      */
     private $id;
 
@@ -68,12 +84,12 @@ class Client
     /**
      * @ORM\Column(type="json", nullable=true)
      */
-    private $roles = [];
+    private $roles = '';
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="client", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @Groups({"client_users"})
-     * @ApiSubResource
+     * @ApiSubResource(maxDepth=2)
+     * @Groups({"client_users", "show"})
      */
     private $users;
 
@@ -123,11 +139,9 @@ class Client
   
     public function eraseCredentials() {}
 
-    public function getRoles(): array
+    public function getRoles()
     {
-        $this->roles;
-
-        return json_decode($roles);
+        return json_encode($this->roles);
     }
 
     /**

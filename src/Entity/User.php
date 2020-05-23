@@ -2,49 +2,36 @@
 
 namespace App\Entity;
 
-use App\Uuid;
+//use App\Uuid;
 use App\Entity\Client;
-use Cocur\Slugify\Slugify;
+use App\DataPersister;
+//use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ApiPlatform\Core\Annotation\ApiProperty;
+//use ApiPlatform\Core\Annotation\ApiProperty;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
- * @ORM\Table(name="users")
- * @ORM\Entity
+ * @ORM\Table(name="users") 
  * 
  * @ApiResource(
- *     collectionOperations={
- *         "get"={
- *              "method"="GET",
- *              "normalization_context"={"groups"={"list"}},
- *              }
- *     },
- *     subresourceOperations={
- *          "api_clients_utilisateurs_get_subresource"={
- *              "method"="GET",
- *              "normalization_context"={"groups"={"sub"}}
+ *      collectionOperations={},
+ *      itemOperations={
+ *          "get"={
+ *              "normalization_context"={"groups"={"details"}}
  *          }
- *     },
- *     itemOperations={
- *         "get"={
- *              "method"="GET",
- *              "path"="/users/{id}",
- *              "normalization_context"={"groups"={"show"}}
- *          },
- *         "delete"={"method"="DELETE"}
- *     }
+ *      },
  * )
  * 
  * @UniqueEntity("email")
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository") 
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
 class User implements UserInterface
 {
@@ -55,21 +42,26 @@ class User implements UserInterface
      * @ORM\Column(type="integer")
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ApiSubResource(maxDepth=0)
      *
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=80)
-     * @Groups({"list", "show", "sub"})
+     * @Groups({"show"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=150, unique=true)
-     * @Groups({"show"})
      */
     private $email;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $phone;
 
     /**
      * @var string The hashed password
@@ -77,21 +69,13 @@ class User implements UserInterface
      */
     private $password;
 
-    // /**
-    //  * @ORM\Column(type="string", length=255)
-    //  * @Groups({"user:write"})
-    //  */
-    // private $slug;
-
     /**
      * @ORM\Column(type="json", nullable=true)
-     * @Groups({"show"})
      */
-    private $roles = [];
+    private $roles = '';
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
-     * @Groups({"list", "show"})
      */
     private $client;
 
@@ -133,6 +117,18 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getPhone(): ?int
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(int $phone): self
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
     public function getPassword()
     {
         return $this->password;
@@ -143,38 +139,6 @@ class User implements UserInterface
         $this->password = $password;
     }
 
-    // /**
-    //  * Initialize slug
-    //  * @ORM\PrePersist
-    //  */
-    // public function initializeSlug()
-    // {
-    //     if (empty($this->slug)) {
-    //         $slugify = new Slugify();
-    //         $slug = $this->username;
-    //         $this->slug = $slugify->slugify($slug);
-    //     }
-    // }
-
-    //  /**
-    //  * @return string|null
-    //  */
-    // public function getSlug(): ?string
-    // {
-    //     return $this->slug;
-    // }
-
-    // /**
-    //  * @param string $slug
-    //  * @return $this
-    //  */
-    // public function setSlug(string $slug): self
-    // {
-    //     $this->slug = $slug;
-
-    //     return $this;
-    // }
-
     public function getSalt()
     {
         return null;
@@ -182,11 +146,9 @@ class User implements UserInterface
   
     public function eraseCredentials() {}
 
-    public function getRoles(): array
+    public function getRoles()
     {
-        $this->roles;
-
-        return json_decode($roles);
+        return json_encode($this->roles);
     }
 
     /**
