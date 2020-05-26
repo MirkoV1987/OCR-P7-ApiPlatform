@@ -2,17 +2,16 @@
 
 namespace App\Entity;
 
-//use App\Uuid;
 use App\Entity\Client;
-use App\DataPersister;
-//use Cocur\Slugify\Slugify;
+use App\DataPersister\UserDataPersister;
+use App\Controller\ClientUserHandler;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
-//use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -22,15 +21,32 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  * @ORM\Table(name="users") 
  * 
  * @ApiResource(
- *      collectionOperations={},
+ *      collectionOperations={
+ *          "special"={
+ *              "method"="POST",
+ *              "path"="/clients/{id}/users/create",
+ *              "controller"=ClientUserHandler::class,
+ *              "denormalization_context"={"groups"={"user.write"}},
+ *              "defaults"={"_api_receive"=false},
+ *          },
+ *      },
  *      itemOperations={
- *          "get"={
- *              "normalization_context"={"groups"={"details"}}
+ *          "get"={},
+ *          "delete"={
+ *              "method"="DELETE",
+ *              "path"="clients/{id}/users/delete",
+ *              "controller"=ClientUserHandler::class,
+ *              "defaults"={"_api_receive"=false},
  *          }
  *      },
+ *      attributes={
+ *          "fetchEager": false,
+ *          "normalization_context"={"groups"={"user.read"}}
+ *     }
  * )
  * 
  * @UniqueEntity("email")
+ * @UniqueEntity("username")
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
 class User implements UserInterface
@@ -43,39 +59,51 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ApiSubResource(maxDepth=0)
+     * @Groups({"user.read"})
      *
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=80)
-     * @Groups({"show"})
+     * @ORM\Column(type="string", length=80, unique=true)
+     * @Groups({"user.write", "user.read"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="string", length=150, unique=true)
+     * @Groups({"user.write", "user.read"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"user.write", "user.read"})
      */
     private $phone;
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Groups({"user.write"})
      */
     private $password;
 
     /**
+     * @var string
+     */
+    private $plainPassword;
+
+    /**
      * @ORM\Column(type="json", nullable=true)
+     * @Groups({"user.write"})
      */
     private $roles = '';
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Client", inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"user.read"})
      */
     private $client;
 
@@ -84,7 +112,7 @@ class User implements UserInterface
      * @var string A "Y-m-d H:i:s" formatted value
      * 
      * @ORM\Column(type="datetime", nullable = true)
-     * @Groups({"show"})
+     * @Groups({"user.write", "user.read"})
      */
     private $dateAdd;
 
@@ -139,12 +167,27 @@ class User implements UserInterface
         $this->password = $password;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
     public function getSalt()
     {
         return null;
     }
   
-    public function eraseCredentials() {}
+    public function eraseCredentials() 
+    {
+        $this->plainPassword = null;
+    }
 
     public function getRoles()
     {
@@ -183,5 +226,10 @@ class User implements UserInterface
         $this->dateAdd = $dateAdd;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->username;
     }
 }

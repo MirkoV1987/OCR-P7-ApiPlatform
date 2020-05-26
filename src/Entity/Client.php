@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
+use App\DataPersister\UserDataPersister;
+use App\Controller\ClientUserHandler;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -21,29 +23,21 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  *      collectionOperations={
  *          "get"={
  *              "path"="/clients/{id}/users/id",
- *              "normalization_context"={"groups"={"client_users"}}
- *          },
- *          "post"={
- *              "path"="/clients/{id}/users/register", "status"=301
  *          }
  *      },
  *      subresourceOperations={
  *          "api_clients_utilisateurs_get_subresource"={
  *              "method"="GET",
- *              "normalization_context"={"groups"={"client_users"}}
- *          }
+ *              "path"="/clients/{id}/users/id"
+ *          },
  *      },
- *       itemOperations={
+ *      itemOperations={
  *          "get"={
  *              "path"="/clients/{id}/users",
- *              "normalization_context"={"groups"={"client_users", "show"}}
  *          },
- *          "delete"={
- *              "path"="/clients/{id}/users/id",
- *          }
  *      },
  *      normalizationContext={
- *          "groups"={"client_users"}, 
+ *          "groups"={"show_client", "show_users"}, 
  *          "enable_max_depth"=true
  *      }
  * )
@@ -59,13 +53,14 @@ class Client
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
+     * @Groups({"show_client"})
      * 
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=80)
-     * @Groups({"client_users"})
+     * @Groups({"show_client"})
      */
     private $name;
 
@@ -89,9 +84,14 @@ class Client
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="client", cascade={"persist", "remove"}, orphanRemoval=true)
      * @ApiSubResource(maxDepth=2)
-     * @Groups({"client_users", "show"})
+     * @Groups({"show_users"})
      */
     private $users;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -154,11 +154,6 @@ class Client
         return $this;
     }
 
-    public function __construct() 
-    { 
-        $this->users = new ArrayCollection(); 
-    }
-
     /**
      * @return Collection|User[]
      */
@@ -187,5 +182,10 @@ class Client
         }
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->name;
     }
 }

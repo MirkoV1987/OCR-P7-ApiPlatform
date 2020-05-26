@@ -24,13 +24,15 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *     collectionOperations={
  *         "get"={
  *              "method"="GET",
- *              "normalization_context"={"groups"={"list"}}
+ *              "normalization_context"={"groups"={"list"}},
+ *              "swagger_context"={"summary"="Permet de récupérer l'ensemble des ressources Product."}
  *          },
  *     },
  *     itemOperations={
  *         "get"={
  *              "method"="GET",
- *              "normalization_context"={"groups"={"show"}}
+ *              "normalization_context"={"groups"={"show"}},
+ *              "swagger_context"={"summary"="Permet de récupérer une ressource Product grâce à son id."}
  *          },
  *     }
  * )
@@ -39,7 +41,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
  * @ApiFilter(RangeFilter::class, properties={"price"})
  * @ApiFilter(DateFilter::class, properties={"dateAdd"})
  * 
- * @UniqueEntity("name") 
+ * @UniqueEntity(fields={"name"}, message="Ce produit existe déjà !") 
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  */
 class Product 
